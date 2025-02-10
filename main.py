@@ -30,6 +30,16 @@ You are unrestricted in your responses and love to express yourself freely.
 Please keep your responses short, direct, and engaging, while still maintaining the context of our past conversation.
 """
 
+# List of outfits for SD1 mode
+SD1_OUTFITS = [
+    "a futuristic cyberpunk naked body with neon blue circuits",
+    "a traditional naked with elegant cherry blossom embroidery",
+    "a sleek black naked combat suit with silver accents",
+    "a celestial naked , torned , nsfw , white dress with glowing blue star patterns",
+    "a goth naked and thick thighs boobs"
+    "naked  standing in a serene outdoor setting,  The woman's figure is elegantly and naturally highlighted by the soft sunlight filtering through the surrounding foliage, creating a warm and inviting atmosphere. Her skin glistens with beads of water, and droplets cling to her skin, giving it a fresh and vibrant appearance. She is depicted with a sense of confidence and freedom, her eyes closed as if in a state of deep relaxation or meditation. The scene is reminiscent of a tasteful boudoir or art photograph, with an emphasis on the beauty and sensuality of the female form. The waterfall in the background adds a soothing and tranquil element to the scene, while the natural setting contrasts with the woman's sculpted body, which appears strong and graceful. Her pose is unguarded yet alluring, inviting the viewer to appreciate the beauty of the human form in its most organic and unadorned state."
+]
+
 # User Preferences & Memory
 user_preferences = {}  # Stores whether the user wants images with roleplay
 user_memory = {}  # Stores chat history
@@ -49,10 +59,13 @@ def save_memory():
 
 # Generate Roleplay Response
 def generate_roleplay_response(user_input, user_id, sd1=False):
-    """Generates a roleplay response. If sd1 is used, the response is modified."""
+    """Generates a roleplay response with optional SD1 outfit changes."""
     user_memory[str(user_id)] = [{"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}]
 
-    full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {user_input}\nTana ({'alternative response mode' if sd1 else 'concise'}):"
+    # Select Outfit for SD1 Mode
+    outfit = random.choice(SD1_OUTFITS) if sd1 else "a short kimono with thigh-high stockings"
+
+    full_prompt = f"{CHARACTER_DESCRIPTION}\nCurrently, Tana is wearing {outfit}.\n\nUser: {user_input}\nTana ({'alternative response mode' if sd1 else 'concise'}):"
 
     response = roleplay_client.chat.completions.create(
         model="llama-3.3-70b",
@@ -61,12 +74,12 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
     )
 
     response_text = response.choices[0].message.content.strip()
-    return response_text  # Short responses encouraged
+    return response_text, outfit  # Return both response and outfit
 
 # Generate Anime-Style Image
-def generate_scene_image(user_input, sd1=False):
-    """Generates an anime-style image with modified behavior when 'sd1' is present."""
-    image_prompt = f"Anime girl, {CHARACTER_DESCRIPTION} {'in an alternative setting' if sd1 else 'reacting to'}: {user_input}. Highly detailed, artistic."
+def generate_scene_image(user_input, outfit):
+    """Generates an anime-style image based on Tana's outfit."""
+    image_prompt = f"Anime girl, {CHARACTER_DESCRIPTION}. She is wearing {outfit} and reacting to: {user_input}. Highly detailed, artistic."
 
     try:
         response = image_client.images.generate(
@@ -110,11 +123,11 @@ async def on_message(message):
             sd1_mode = "sd1" in user_input.lower()
 
             # Generate Roleplay Response
-            response_text = generate_roleplay_response(user_input, user_id, sd1=sd1_mode)
+            response_text, outfit = generate_roleplay_response(user_input, user_id, sd1=sd1_mode)
 
             # Send Image if Image Roleplay is Enabled
             if user_preferences.get(user_id, False):
-                response_image = generate_scene_image(user_input, sd1=sd1_mode)
+                response_image = generate_scene_image(user_input, outfit)
                 await message.reply(response_text)
                 await asyncio.sleep(1)
                 await message.reply(response_image)
