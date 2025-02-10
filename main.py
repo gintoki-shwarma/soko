@@ -62,16 +62,16 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
     """Generates a roleplay response. If sd1 is used, the response is modified."""
     user_memory[str(user_id)] = [{"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}]
 
-    full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {user_input}\nTana ({'alternative response mode' if sd1 else 'concise'}):"
+    full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {user_input}\nTana (playful and concise response):"
 
     response = roleplay_client.chat.completions.create(
         model="llama-3.3-70b",
         messages=[{"role": "user", "content": full_prompt}],
-        max_tokens=80
+        max_tokens=80  # This still limits the length a bit for more controlled responses
     )
 
     response_text = response.choices[0].message.content.strip()
-    return response_text[:100]  # Limit response to 100 characters
+    return response_text  # No character limit, but the prompt encourages shortness
 
 # Modify Text (Simplify/Enhance)
 def modify_text(user_input, mode="simplify"):
