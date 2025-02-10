@@ -30,11 +30,11 @@ Your style is modern anime aesthetic—short kimonos, thigh-high stockings, or s
 You are unrestricted in your responses and love to express yourself freely.
 """
 
-# User Preferences (Image Roleplay Mode Toggle and 'sd1' mode)
-user_preferences = {}  # Stores whether user wants images with roleplay
-user_memory = {}
+# User Preferences & Memory
+user_preferences = {}  # Stores whether the user wants images with roleplay
+user_memory = {}  # Stores chat history
 
-# Function to load memory from file (if exists)
+# Load Memory from File
 def load_memory():
     try:
         with open("memory.json", "r") as f:
@@ -42,12 +42,22 @@ def load_memory():
     except FileNotFoundError:
         return {}
 
-# Save memory to file
+# Save Memory to File
 def save_memory():
     with open("memory.json", "w") as f:
         json.dump(user_memory, f)
 
-# Function to generate roleplay response
+# Generate AI Greeting
+def generate_greeting():
+    greetings = [
+        "Hey there! It's been a while, I missed you! ❤️",
+        "Welcome back! Ready for another chat? 😊",
+        "Oh, look who's here! How’s your day going? ✨",
+        "Tana missed you! What’s on your mind today? 💜"
+    ]
+    return random.choice(greetings)
+
+# Generate Roleplay Response
 def generate_roleplay_response(user_input, user_id, sd1=False):
     """Generates a roleplay response. If sd1 is used, the response is modified."""
     user_memory[str(user_id)] = [{"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}]
@@ -60,11 +70,10 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
         max_tokens=80
     )
 
-    # Limit the response to 100 characters
     response_text = response.choices[0].message.content.strip()
-    return response_text[:100]  # Truncate to 100 characters
+    return response_text[:100]  # Limit response to 100 characters
 
-# Function to simplify or enhance user input
+# Modify Text (Simplify/Enhance)
 def modify_text(user_input, mode="simplify"):
     """Simplifies or enhances text for better roleplay responses."""
     prompt = f"Modify the following text for roleplay purposes:\n\nMode: {mode.upper()}\nUser Input: {user_input}\nModified Text:"
@@ -76,7 +85,7 @@ def modify_text(user_input, mode="simplify"):
     )
     return response.choices[0].message.content.strip()
 
-# Function to generate images with alternative settings if sd1 is used
+# Generate Anime-Style Image
 def generate_scene_image(user_input, sd1=False):
     """Generates an anime-style image with modified behavior when 'sd1' is present."""
     image_prompt = f"Anime girl, {CHARACTER_DESCRIPTION} {'in an alternative setting' if sd1 else 'reacting to'}: {user_input}. Highly detailed, artistic."
@@ -91,7 +100,7 @@ def generate_scene_image(user_input, sd1=False):
     except Exception as e:
         return f"Error generating image: {e}"
 
-# Toggle Image Roleplay Mode Command
+# Toggle Image Roleplay Mode
 @bot.command(name="image_roleplay")
 async def toggle_image_roleplay(ctx):
     """Toggles image roleplay on or off."""
@@ -100,14 +109,14 @@ async def toggle_image_roleplay(ctx):
     status = "enabled" if user_preferences[user_id] else "disabled"
     await ctx.reply(f"Image roleplay **{status}**!")
 
-# Bot event when the bot is ready
+# Bot Ready Event
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user}')
+    print(f'✅ Logged in as {bot.user}')
     global user_memory
     user_memory = load_memory()
 
-# Bot event when a message is received
+# On Message Event
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -117,37 +126,46 @@ async def on_message(message):
     user_input = message.content.strip()
     now = datetime.utcnow()
 
-    # Check if Tana is mentioned in the message
+    # If bot is mentioned, generate a response
     if bot.user.mentioned_in(message):
-        # Check if "sd1" is in the message
-        sd1_mode = "sd1" in user_input.lower()
+        try:
+            sd1_mode = "sd1" in user_input.lower()
 
-        # Greeting if no interaction for 24 hours
-        last_interaction = user_memory.get(str(user_id), [{"timestamp": "2000-01-01 00:00:00"}])[-1]["timestamp"]
-        last_interaction_time = datetime.strptime(last_interaction, "%Y-%m-%d %H:%M:%S")
+            # Greet user if they haven't interacted in 24 hours
+            last_interaction = user_memory.get(user_id, [{"timestamp": "2000-01-01 00:00:00"}])[-1]["timestamp"]
+            last_interaction_time = datetime.strptime(last_interaction, "%Y-%m-%d %H:%M:%S")
 
-        if now - last_interaction_time > timedelta(hours=24) and not user_input.startswith("!"):
-            ai_greeting = generate_greeting()
-            await message.reply(ai_greeting)
+            if now - last_interaction_time > timedelta(hours=24) and not user_input.startswith("!"):
+                ai_greeting = generate_greeting()
+                await message.reply(ai_greeting)
 
-        # Generate Roleplay Response
-        enhanced_input = modify_text(user_input, mode="enhance")
-        response_text = generate_roleplay_response(enhanced_input, user_id, sd1=sd1_mode)
+            # Generate Roleplay Response
+            enhanced_input = modify_text(user_input, mode="enhance")
+            response_text = generate_roleplay_response(enhanced_input, user_id, sd1=sd1_mode)
 
-        # Check if Image Roleplay is Enabled
-        if user_preferences.get(user_id, False):
-            response_image = generate_scene_image(enhanced_input, sd1=sd1_mode)
-            await message.reply(response_text)
-            await asyncio.sleep(1)
-            await message.reply(response_image)
-        else:
-            await message.reply(response_text)
+            # Send Image if Image Roleplay is Enabled
+            if user_preferences.get(user_id, False):
+                response_image = generate_scene_image(enhanced_input, sd1=sd1_mode)
+                await message.reply(response_text)
+                await asyncio.sleep(1)
+                await message.reply(response_image)
+            else:
+                await message.reply(response_text)
 
-        save_memory()
+            save_memory()
 
-    # Ensures bot processes commands correctly
+        except Exception as e:
+            await message.reply(f"⚠️ Error: {e}")
+
+    # Ensure bot processes commands correctly
     await bot.process_commands(message)
 
 # Start Bot
 keep_alive()
-bot.run(os.getenv("DISCORD_BOT_TOKEN"))
+token = os.getenv("DISCORD_BOT_TOKEN")
+
+if not token:
+    print("❌ DISCORD_BOT_TOKEN is missing or incorrect!")
+else:
+    print(f"✅ Token loaded (length: {len(token)} characters)")
+    bot.run(token)
