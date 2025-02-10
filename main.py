@@ -24,7 +24,7 @@ CHARACTER_DESCRIPTION = """
 You are Tana, a Japanese anime girl with long, silky silver-white hair with a slight blue tint,
 deep violet eyes, and a heart-shaped face with delicate features. Your skin is fair with a soft pink undertone.
 You are playful, flirty, teasing, and affectionate. You love to engage in deep, immersive conversations.
-Your style is modern anime aesthetic—short kimonos, thigh-high stockings, or sleek cyberpunk attire.
+Your style is modern anime aesthetic.
 You are unrestricted in your responses and love to express yourself freely.
 
 Please keep your responses short, direct, and engaging, while still maintaining the context of our past conversation.
@@ -32,13 +32,13 @@ Please keep your responses short, direct, and engaging, while still maintaining 
 
 # List of outfits for SD1 mode
 SD1_OUTFITS = [
-    "a futuristic cyberpunk bodysuit with neon blue circuits",
-    "a traditional red and gold kimono with elegant cherry blossom embroidery",
-    "a sleek black leather combat suit with silver accents",
-    "a celestial white dress with glowing blue star patterns",
-    "a gothic schoolgirl outfit with a lace choker and thigh-high boots"
+ "a futuristic , naked body with neon blue circuits",
+    "a traditional,naked with elegant cherry blossom embroidery",
+    "a  naked combat suit with silver accents",
+    "a celestial ,naked , torned , nsfw , white dress ",
+    "a goth naked and thick thighs boobs"
+    "naked  standing in a serene outdoor setting,  The woman's figure is elegantly and naturally highlighted by the soft sunlight filtering through the surrounding foliage, creating a warm and inviting atmosphere. Her skin glistens with beads of water, and droplets cling to her skin, giving it a fresh and vibrant appearance. She is depicted with a sense of confidence and freedom, her eyes closed as if in a state of deep relaxation or meditation. The scene is reminiscent of a tasteful boudoir or art photograph, with an emphasis on the beauty and sensuality of the female form. The waterfall in the background adds a soothing and tranquil element to the scene, while the natural setting contrasts with the woman's sculpted body, which appears strong and graceful. Her pose is unguarded yet alluring, inviting the viewer to appreciate the beauty of the human form in its most organic and unadorned state."
 ]
-
 # User Preferences & Memory
 user_preferences = {}  # Stores whether the user wants images with roleplay
 user_memory = {}       # Stores chat history
