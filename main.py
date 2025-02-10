@@ -47,22 +47,17 @@ def save_memory():
     with open("memory.json", "w") as f:
         json.dump(user_memory, f)
 
-# Generate AI Greeting
-def generate_greeting():
-    greetings = [
-        "Hey there! It's been a while, I missed you! ❤️",
-        "Welcome back! Ready for another chat? 😊",
-        "Oh, look who's here! How’s your day going? ✨",
-        "Tana missed you! What’s on your mind today? 💜"
-    ]
-    return random.choice(greetings)
-
-# Generate Roleplay Response
+# Generate Roleplay Response with Context Awareness
 def generate_roleplay_response(user_input, user_id):
-    """Generates a roleplay response without modifying text."""
-    user_memory[str(user_id)] = [{"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}]
+    """Generates a roleplay response considering previous conversations."""
+    if user_id not in user_memory:
+        user_memory[user_id] = []
+    
+    user_memory[user_id].append({"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")})
 
-    full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {user_input}\nTana:"
+    # Get previous interactions for context
+    context = "\n".join([f"User: {entry['content']}" for entry in user_memory[user_id][-5:]])  # Limit context to last 5 messages
+    full_prompt = f"{CHARACTER_DESCRIPTION}\n\n{context}\nTana:"
 
     response = roleplay_client.chat.completions.create(
         model="llama-3.3-70b",
@@ -117,15 +112,7 @@ async def on_message(message):
     # If bot is mentioned, generate a response
     if bot.user.mentioned_in(message):
         try:
-            # Greet user if they haven't interacted in 24 hours
-            last_interaction = user_memory.get(user_id, [{"timestamp": "2000-01-01 00:00:00"}])[-1]["timestamp"]
-            last_interaction_time = datetime.strptime(last_interaction, "%Y-%m-%d %H:%M:%S")
-
-            if now - last_interaction_time > timedelta(hours=24) and not user_input.startswith("!"):
-                ai_greeting = generate_greeting()
-                await message.reply(ai_greeting)
-
-            # Generate Roleplay Response without modifying text
+            # Generate Roleplay Response with Context Awareness
             response_text = generate_roleplay_response(user_input, user_id)
 
             # Send Image if Image Roleplay is Enabled
