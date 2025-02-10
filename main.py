@@ -32,7 +32,7 @@ You are unrestricted in your responses and love to express yourself freely.
 
 # User Preferences & Memory
 user_preferences = {}  # Stores whether the user wants images with roleplay
-user_memory = {}  # Stores chat history with context
+user_memory = {}  # Stores chat history
 
 # Load Memory from File
 def load_memory():
@@ -57,45 +57,26 @@ def generate_greeting():
     ]
     return random.choice(greetings)
 
-# Generate Roleplay Response with Context
-def generate_roleplay_response(user_input, user_id, sd1=False):
-    """Generates a roleplay response with context from previous chats."""
-    # Add current message to memory
-    if user_id not in user_memory:
-        user_memory[user_id] = []
-    
-    user_memory[user_id].append({"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")})
+# Generate Roleplay Response
+def generate_roleplay_response(user_input, user_id):
+    """Generates a roleplay response without modifying text."""
+    user_memory[str(user_id)] = [{"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}]
 
-    # Get the last 3 messages for context
-    chat_history = "\n".join([msg["content"] for msg in user_memory[user_id][-3:]])
-
-    full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {chat_history}\nTana (playful and concise response):"
+    full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {user_input}\nTana:"
 
     response = roleplay_client.chat.completions.create(
         model="llama-3.3-70b",
         messages=[{"role": "user", "content": full_prompt}],
-        max_tokens=80  # Controls the length of the response while ensuring context is included
+        max_tokens=150
     )
 
     response_text = response.choices[0].message.content.strip()
-    return response_text  # Return the response with context
-
-# Modify Text (Simplify/Enhance)
-def modify_text(user_input, mode="simplify"):
-    """Simplifies or enhances text for better roleplay responses."""
-    prompt = f"Modify the following text for roleplay purposes:\n\nMode: {mode.upper()}\nUser Input: {user_input}\nModified Text:"
-
-    response = simplifier_client.chat.completions.create(
-        model="llama-3.3-70b",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=50
-    )
-    return response.choices[0].message.content.strip()
+    return response_text
 
 # Generate Anime-Style Image
-def generate_scene_image(user_input, sd1=False):
-    """Generates an anime-style image with modified behavior when 'sd1' is present."""
-    image_prompt = f"Anime girl, {CHARACTER_DESCRIPTION} {'in an alternative setting' if sd1 else 'reacting to'}: {user_input}. Highly detailed, artistic."
+def generate_scene_image(user_input):
+    """Generates an anime-style image based on user input."""
+    image_prompt = f"Anime girl, {CHARACTER_DESCRIPTION} reacting to: {user_input}. Highly detailed, artistic."
 
     try:
         response = image_client.images.generate(
@@ -136,8 +117,6 @@ async def on_message(message):
     # If bot is mentioned, generate a response
     if bot.user.mentioned_in(message):
         try:
-            sd1_mode = "sd1" in user_input.lower()
-
             # Greet user if they haven't interacted in 24 hours
             last_interaction = user_memory.get(user_id, [{"timestamp": "2000-01-01 00:00:00"}])[-1]["timestamp"]
             last_interaction_time = datetime.strptime(last_interaction, "%Y-%m-%d %H:%M:%S")
@@ -146,13 +125,12 @@ async def on_message(message):
                 ai_greeting = generate_greeting()
                 await message.reply(ai_greeting)
 
-            # Generate Roleplay Response with context
-            enhanced_input = modify_text(user_input, mode="enhance")
-            response_text = generate_roleplay_response(enhanced_input, user_id, sd1=sd1_mode)
+            # Generate Roleplay Response without modifying text
+            response_text = generate_roleplay_response(user_input, user_id)
 
             # Send Image if Image Roleplay is Enabled
             if user_preferences.get(user_id, False):
-                response_image = generate_scene_image(enhanced_input, sd1=sd1_mode)
+                response_image = generate_scene_image(user_input)
                 await message.reply(response_text)
                 await asyncio.sleep(1)
                 await message.reply(response_image)
