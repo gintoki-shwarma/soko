@@ -6,7 +6,7 @@ from g4f.client import Client as TextClient
 from g4f.client import Client as ImageClient
 import asyncio
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from keep_alive import keep_alive
 
 # Initialize bot with intents
@@ -47,29 +47,28 @@ def save_memory():
     with open("memory.json", "w") as f:
         json.dump(user_memory, f)
 
-# Generate Roleplay Response
-def generate_roleplay_response(user_input, user_id, sd1=False):
+# Generate Roleplay Response (ASYNC FIX)
+async def generate_roleplay_response(user_input, user_id, sd1=False):
     """Generates a roleplay response. If sd1 is used, the response is modified."""
     user_memory[str(user_id)] = [{"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}]
 
     full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {user_input}\nTana ({'alternative response mode' if sd1 else 'concise'}):"
 
-    response = roleplay_client.chat.completions.create(
+    response = await roleplay_client.chat.completions.create(
         model="llama-3.3-70b",
         messages=[{"role": "user", "content": full_prompt}],
-        max_tokens=200  # Keeps responses short by limiting tokens
+        max_tokens=200
     )
 
-    response_text = response.choices[0].message.content.strip()
-    return response_text  # Short responses encouraged
+    return response.choices[0].message.content.strip()
 
-# Generate Anime-Style Image
-def generate_scene_image(user_input, sd1=False):
+# Generate Anime-Style Image (ASYNC FIX)
+async def generate_scene_image(user_input, sd1=False):
     """Generates an anime-style image with modified behavior when 'sd1' is present."""
     image_prompt = f"Anime girl, {CHARACTER_DESCRIPTION} {'in an alternative setting' if sd1 else 'reacting to'}: {user_input}. Highly detailed, artistic."
 
     try:
-        response = image_client.images.generate(
+        response = await image_client.images.generate(
             model="dall-e-3",
             prompt=image_prompt,
             response_format="url"
@@ -94,7 +93,7 @@ async def on_ready():
     global user_memory
     user_memory = load_memory()
 
-# On Message Event
+# On Message Event (ASYNC FIX)
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -102,7 +101,6 @@ async def on_message(message):
 
     user_id = str(message.author.id)
     user_input = message.content.strip()
-    now = datetime.utcnow()
 
     # If bot is mentioned, generate a response
     if bot.user.mentioned_in(message):
@@ -110,11 +108,11 @@ async def on_message(message):
             sd1_mode = "sd1" in user_input.lower()
 
             # Generate Roleplay Response
-            response_text = generate_roleplay_response(user_input, user_id, sd1=sd1_mode)
+            response_text = await generate_roleplay_response(user_input, user_id, sd1=sd1_mode)
 
             # Send Image if Image Roleplay is Enabled
             if user_preferences.get(user_id, False):
-                response_image = generate_scene_image(user_input, sd1=sd1_mode)
+                response_image = await generate_scene_image(user_input, sd1=sd1_mode)
                 await message.reply(response_text)
                 await asyncio.sleep(1)
                 await message.reply(response_image)
