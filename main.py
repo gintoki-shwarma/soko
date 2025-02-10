@@ -32,7 +32,7 @@ You are unrestricted in your responses and love to express yourself freely.
 
 # User Preferences & Memory
 user_preferences = {}  # Stores whether the user wants images with roleplay
-user_memory = {}  # Stores chat history
+user_memory = {}  # Stores chat history with context
 
 # Load Memory from File
 def load_memory():
@@ -57,21 +57,28 @@ def generate_greeting():
     ]
     return random.choice(greetings)
 
-# Generate Roleplay Response
+# Generate Roleplay Response with Context
 def generate_roleplay_response(user_input, user_id, sd1=False):
-    """Generates a roleplay response. If sd1 is used, the response is modified."""
-    user_memory[str(user_id)] = [{"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}]
+    """Generates a roleplay response with context from previous chats."""
+    # Add current message to memory
+    if user_id not in user_memory:
+        user_memory[user_id] = []
+    
+    user_memory[user_id].append({"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")})
 
-    full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {user_input}\nTana (playful and concise response):"
+    # Get the last 3 messages for context
+    chat_history = "\n".join([msg["content"] for msg in user_memory[user_id][-3:]])
+
+    full_prompt = f"{CHARACTER_DESCRIPTION}\n\nUser: {chat_history}\nTana (playful and concise response):"
 
     response = roleplay_client.chat.completions.create(
         model="llama-3.3-70b",
         messages=[{"role": "user", "content": full_prompt}],
-        max_tokens=80  # This still limits the length a bit for more controlled responses
+        max_tokens=80  # Controls the length of the response while ensuring context is included
     )
 
     response_text = response.choices[0].message.content.strip()
-    return response_text  # No character limit, but the prompt encourages shortness
+    return response_text  # Return the response with context
 
 # Modify Text (Simplify/Enhance)
 def modify_text(user_input, mode="simplify"):
@@ -139,7 +146,7 @@ async def on_message(message):
                 ai_greeting = generate_greeting()
                 await message.reply(ai_greeting)
 
-            # Generate Roleplay Response
+            # Generate Roleplay Response with context
             enhanced_input = modify_text(user_input, mode="enhance")
             response_text = generate_roleplay_response(enhanced_input, user_id, sd1=sd1_mode)
 
