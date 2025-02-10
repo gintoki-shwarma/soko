@@ -150,4 +150,4 @@ async def on_message(message):
 
 # Start Bot
 keep_alive()
-bot.run(os.getenv("MTMzNzA2MzcyNDcyMDA2NjU3Mg.G_FeFt.IORzd6j_Avm_jU7aBCc6Si73Zu9GSWuvodgnt4"))
+bot.run(os.getenv("DISCORD_BOT_TOKEN"))
