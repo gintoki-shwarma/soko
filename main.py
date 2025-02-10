@@ -18,7 +18,6 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # GPT Clients
 roleplay_client = TextClient()  # Roleplay AI
 simplifier_client = TextClient()  # Text Enhancer/Simplifier AI
-greeting_client = TextClient()  # AI-Generated Greetings
 image_client = ImageClient()  # AI Image Generator
 
 # Character Description for Roleplay
@@ -49,14 +48,22 @@ def save_memory():
 
 # Generate Roleplay Response with Context Awareness
 def generate_roleplay_response(user_input, user_id):
-    """Generates a roleplay response considering previous conversations."""
+    """Generates a roleplay response considering the last 24 hours of conversation."""
     if user_id not in user_memory:
         user_memory[user_id] = []
     
+    # Add current message to memory
     user_memory[user_id].append({"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")})
 
-    # Get previous interactions for context
-    context = "\n".join([f"User: {entry['content']}" for entry in user_memory[user_id][-5:]])  # Limit context to last 5 messages
+    # Get messages within the last 24 hours
+    now = datetime.utcnow()
+    recent_messages = [
+        entry for entry in user_memory[user_id] if now - datetime.strptime(entry["timestamp"], "%Y-%m-%d %H:%M:%S") < timedelta(hours=24)
+    ]
+    
+    # Build context from the last 5 messages within 24 hours
+    context = "\n".join([f"User: {entry['content']}" for entry in recent_messages[-5:]])  # Limit context to last 5 relevant messages
+    
     full_prompt = f"{CHARACTER_DESCRIPTION}\n\n{context}\nTana:"
 
     response = roleplay_client.chat.completions.create(
@@ -107,12 +114,11 @@ async def on_message(message):
 
     user_id = str(message.author.id)
     user_input = message.content.strip()
-    now = datetime.utcnow()
 
     # If bot is mentioned, generate a response
     if bot.user.mentioned_in(message):
         try:
-            # Generate Roleplay Response with Context Awareness
+            # Generate Roleplay Response with Context Awareness (within 24 hours)
             response_text = generate_roleplay_response(user_input, user_id)
 
             # Send Image if Image Roleplay is Enabled
