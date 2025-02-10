@@ -4,8 +4,9 @@ import random
 from discord.ext import commands
 from g4f.client import Client as TextClient
 from g4f.client import Client as ImageClient
+import asyncio
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from keep_alive import keep_alive
 
 # Initialize bot with intents
@@ -46,7 +47,7 @@ def save_memory():
     with open("memory.json", "w") as f:
         json.dump(user_memory, f)
 
-# Generate Roleplay Response (FIXED)
+# Generate Roleplay Response
 def generate_roleplay_response(user_input, user_id, sd1=False):
     """Generates a roleplay response. If sd1 is used, the response is modified."""
     user_memory[str(user_id)] = [{"content": user_input, "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}]
@@ -56,12 +57,13 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
     response = roleplay_client.chat.completions.create(
         model="llama-3.3-70b",
         messages=[{"role": "user", "content": full_prompt}],
-        max_tokens=200
+        max_tokens=200  # Keeps responses short by limiting tokens
     )
 
-    return response.choices[0].message.content.strip()
+    response_text = response.choices[0].message.content.strip()
+    return response_text  # Short responses encouraged
 
-# Generate Anime-Style Image (FIXED)
+# Generate Anime-Style Image
 def generate_scene_image(user_input, sd1=False):
     """Generates an anime-style image with modified behavior when 'sd1' is present."""
     image_prompt = f"Anime girl, {CHARACTER_DESCRIPTION} {'in an alternative setting' if sd1 else 'reacting to'}: {user_input}. Highly detailed, artistic."
@@ -92,7 +94,7 @@ async def on_ready():
     global user_memory
     user_memory = load_memory()
 
-# On Message Event (FIXED)
+# On Message Event
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -100,6 +102,7 @@ async def on_message(message):
 
     user_id = str(message.author.id)
     user_input = message.content.strip()
+    now = datetime.utcnow()
 
     # If bot is mentioned, generate a response
     if bot.user.mentioned_in(message):
@@ -113,6 +116,7 @@ async def on_message(message):
             if user_preferences.get(user_id, False):
                 response_image = generate_scene_image(user_input, sd1=sd1_mode)
                 await message.reply(response_text)
+                await asyncio.sleep(1)
                 await message.reply(response_image)
             else:
                 await message.reply(response_text)
