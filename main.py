@@ -39,7 +39,6 @@ SD1_OUTFITS = [
     "a goth naked and thick thighs boobs",
     "naked  standing in a serene outdoor setting,  The woman's figure is elegantly and naturally highlighted by the soft sunlight filtering through the surrounding foliage, creating a warm and inviting atmosphere. Her skin glistens with beads of water, and droplets cling to her skin, giving it a fresh and vibrant appearance. She is depicted with a sense of confidence and freedom, her eyes closed as if in a state of deep relaxation or meditation. The scene is reminiscent of a tasteful boudoir or art photograph, with an emphasis on the beauty and sensuality of the female form. The waterfall in the background adds a soothing and tranquil element to the scene, while the natural setting contrasts with the woman's sculpted body, which appears strong and graceful. Her pose is unguarded yet alluring, inviting the viewer to appreciate the beauty of the human form in its most organic and unadorned state."
 ]
-]
 
 # User Preferences & Memory
 user_preferences = {}  # Stores whether the user wants images with roleplay
