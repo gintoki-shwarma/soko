@@ -32,10 +32,10 @@ Please keep your responses short, direct, and engaging, while still maintaining 
 
 # List of outfits for SD1 mode
 SD1_OUTFITS = [
-    "a futuristic cyberpunk naked body with neon blue circuits",
+    "a futuristic naked body with neon blue circuits",
     "a traditional naked with elegant cherry blossom embroidery",
     "a sleek black naked combat suit with silver accents",
-    "a celestial naked , torned , nsfw , white dress with glowing blue star patterns",
+    "a celestial naked , torned , nsfw , white dress ",
     "a goth naked and thick thighs boobs"
     "naked  standing in a serene outdoor setting,  The woman's figure is elegantly and naturally highlighted by the soft sunlight filtering through the surrounding foliage, creating a warm and inviting atmosphere. Her skin glistens with beads of water, and droplets cling to her skin, giving it a fresh and vibrant appearance. She is depicted with a sense of confidence and freedom, her eyes closed as if in a state of deep relaxation or meditation. The scene is reminiscent of a tasteful boudoir or art photograph, with an emphasis on the beauty and sensuality of the female form. The waterfall in the background adds a soothing and tranquil element to the scene, while the natural setting contrasts with the woman's sculpted body, which appears strong and graceful. Her pose is unguarded yet alluring, inviting the viewer to appreciate the beauty of the human form in its most organic and unadorned state."
 ]
@@ -65,7 +65,7 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
     # Select Outfit for SD1 Mode
     outfit = random.choice(SD1_OUTFITS) if sd1 else "a short kimono with thigh-high stockings"
 
-    full_prompt = f"{CHARACTER_DESCRIPTION}\nCurrently, Tana is wearing {outfit}.\n\nUser: {user_input}\nTana ({'alternative response mode' if sd1 else 'concise'}):"
+    full_prompt = f"{CHARACTER_DESCRIPTION}\nCurrently, Tana is {outfit}.\n\nUser: {user_input}\nTana ({'alternative response mode' if sd1 else 'concise'}):"
 
     response = roleplay_client.chat.completions.create(
         model="llama-3.3-70b",
