@@ -130,10 +130,10 @@ def generate_scene_image(user_input, outfit, sd1=False):
 
     try:
         response = image_client.images.generate(
-            model="flux",
+            model="dall-e-3",
             prompt=image_prompt,
             response_format="url",
-            size="1024x1792"  # Forces a tall full-body image
+            size="1080x1920"  # Forces a tall full-body image
         )
         return response.data[0].url if response.data else "Failed to generate image."
     except Exception as e:
