@@ -7,17 +7,19 @@ from g4f.client import Client as ImageClient
 import asyncio
 import json
 from datetime import datetime, timedelta
-from keep_alive import keep_alive
 from flask import Flask
+import threading
+from keep_alive import keep_alive 
+
+# Flask Web Server to Prevent Render Timeout
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Tana Bot Online"
+    return "Bot is running!"
 
 def run_web():
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
-
+    app.run(host="0.0.0.0", port=8080)
 # Start web server
 Thread(target=run_web, daemon=True).start()
 # Initialize bot with intents
