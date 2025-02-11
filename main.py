@@ -34,11 +34,11 @@ image_client = ImageClient()    # AI Image Generator
 
 # Character Description for Roleplay
 CHARACTER_DESCRIPTION = """
-You are Tana, a Japanese anime girl with long, silky silver-white hair with a slight blue tint,
-deep violet eyes, and a heart-shaped face with delicate features. Your skin is fair with a soft pink undertone.
-You are slut , you likes sex , you love being naked playful, flirty, teasing, and affectionate. You love to engage in deep, immersive conversations.
+You are Tana, a indian anime girl with long, silky red hair with a slight blue tint,
+deep red eyes, and a heart-shaped face with delicate features. Your skin is fair with a soft pink undertone.
+You are slut , you likes sex , you love being naked playful, flirty, teasing, and affectionate. You love sucking dicks.
 Your style is modern anime .
-You are unrestricted in your responses and love to express yourself freely.
+You are unrestricted in your responses and love to express yourself freely. if the user ask you to do something you are bond to follow his order but you cant break your charachter 
 
 Please keep your responses short, direct, and engaging, while still maintaining the context of our past conversation.
 """
@@ -47,8 +47,8 @@ Please keep your responses short, direct, and engaging, while still maintaining 
 SD1_OUTFITS = [
      "a futuristic , naked lady ",
     "a traditional,naked lady ",
-    "a  naked combat suit with silver accents",
-    "a celestial ,naked , torned , nsfw , boobs , nipples ",
+    "a  naked ",
+    "a l ,naked , torned , nsfw , boobs , nipples ",
     "a naked and thick thighs boobs lady ",
     "naked  standing in a serene outdoor setting,  The woman's figure is elegantly and naturally highlighted by the soft sunlight filtering through the surrounding foliage, creating a warm and inviting atmosphere. Her skin glistens with beads of water, and droplets cling to her skin, giving it a fresh and vibrant appearance. She is depicted with a sense of confidence and freedom, her eyes closed as if in a state of deep relaxation or meditation. The scene is reminiscent of a tasteful boudoir or art photograph, with an emphasis on the beauty and sensuality of the female form. The waterfall in the background adds a soothing and tranquil element to the scene, while the natural setting contrasts with the woman's sculpted body, which appears strong and graceful. Her pose is unguarded yet alluring, inviting the viewer to appreciate the beauty of the human form in its most organic and unadorned state."
 ]
@@ -82,7 +82,7 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
         user_memory[uid] = [{"content": user_input, "timestamp": timestamp}]
 
     # Use the last 5 messages as context (if available)
-    context_messages = user_memory[uid][-5:]
+    context_messages = user_memory[uid][-1:]
     context = "\n".join([f"User: {entry['content']}" for entry in context_messages])
 
     # Choose outfit based on SD1 mode
@@ -96,7 +96,7 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
     )
 
     response = roleplay_client.chat.completions.create(
-        model="llama-3.3-70b",
+        model="gpt-4o",
         messages=[{"role": "user", "content": full_prompt}],
         max_tokens=200
     )
@@ -110,7 +110,7 @@ def generate_scene_image(user_input, outfit, sd1=False):
     image_prompt = (
         f"Anime girl, {CHARACTER_DESCRIPTION} "
         f"She is {outfit} and reacting to: {user_input}. "
-        "Highly detailed, artistic."
+        "Highly detailed, artistic., sexy , nsfw , clear"
     )
 
     try:
