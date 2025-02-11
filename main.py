@@ -8,7 +8,17 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 from keep_alive import keep_alive
+app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return "Tana Bot Online"
+
+def run_web():
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+
+# Start web server
+Thread(target=run_web, daemon=True).start()
 # Initialize bot with intents
 intents = discord.Intents.default()
 intents.messages = True
