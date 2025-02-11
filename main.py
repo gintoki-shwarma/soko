@@ -130,7 +130,7 @@ def generate_scene_image(user_input, outfit, sd1=False):
 
     try:
         response = image_client.images.generate(
-            model="turbo",
+            model="flux",
             prompt=image_prompt,
             response_format="url",
             size="1024x1792"  # Forces a tall full-body image
