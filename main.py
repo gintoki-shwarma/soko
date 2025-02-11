@@ -9,7 +9,7 @@ import json
 from datetime import datetime, timedelta
 from keep_alive import keep_alive
 from flask import Flask
-app = flask(__name__)
+app = Flask(__name__)
 
 @app.route('/')
 def home():
