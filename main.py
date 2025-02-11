@@ -92,7 +92,7 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
 
     full_prompt = (
         f"{CHARACTER_DESCRIPTION}\n"
-        f"Currently, Tana is wearing {outfit}.\n\n"
+        f"Currently, Tana is naked {outfit}.\n\n"
         f"{context}\n"
         f"Tana ({'alternative response mode' if sd1 else 'concise'}):"
     )
@@ -113,8 +113,8 @@ def generate_scene_image(user_input, outfit, sd1=False):
     
     # Add slight variations to the prompt for uniqueness
     random_elements = [
-        "standing confidently with a soft breeze moving her hair",
-        "posing gracefully in a scenic background",
+        "standing confidently with a soft breeze moving her boobs",
+        "posing gracefully with a dildo in her pussy in a scenic background",
         "with a mysterious aura, standing tall",
         "full-body view, detailed and dynamic",
         "in a strong yet elegant stance, fully visible"
@@ -124,7 +124,7 @@ def generate_scene_image(user_input, outfit, sd1=False):
 
     image_prompt = (
         f"Full-body anime girl, {CHARACTER_DESCRIPTION}, "
-        f"She is wearing {outfit} and reacting to: {user_input}. "
+        f"She is naked {outfit} and reacting to: {user_input}. "
         f"{random_detail}. Highly detailed, artistic, vibrant colors, full-body shot, dynamic lighting."
     )
 
