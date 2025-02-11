@@ -11,6 +11,8 @@ from flask import Flask
 import threading
 from keep_alive import keep_alive 
 from threading import Thread
+import random
+from datetime import datetime
 # Flask Web Server to Prevent Render Timeout
 app = Flask(__name__)
 
@@ -105,19 +107,33 @@ def generate_roleplay_response(user_input, user_id, sd1=False):
     return response_text, outfit  # Return both the response and the outfit for image matching
 
 # Generate Anime-Style Image
+# Generate Anime-Style Image (Full-Body)
 def generate_scene_image(user_input, outfit, sd1=False):
-    """Generates an anime-style image based on Tana's outfit and the user input."""
+    """Generates a full-body anime-style image based on Tana's outfit and the user input."""
+    
+    # Add slight variations to the prompt for uniqueness
+    random_elements = [
+        "standing confidently with a soft breeze moving her hair",
+        "posing gracefully in a scenic background",
+        "with a mysterious aura, standing tall",
+        "full-body view, detailed and dynamic",
+        "in a strong yet elegant stance, fully visible"
+    ]
+    
+    random_detail = random.choice(random_elements)
+
     image_prompt = (
-        f"Anime girl, {CHARACTER_DESCRIPTION} "
-        f"She is {outfit} and reacting to: {user_input}. "
-        "Highly detailed, artistic."
+        f"Full-body anime girl, {CHARACTER_DESCRIPTION}, "
+        f"She is wearing {outfit} and reacting to: {user_input}. "
+        f"{random_detail}. Highly detailed, artistic, vibrant colors, full-body shot, dynamic lighting."
     )
 
     try:
         response = image_client.images.generate(
             model="dall-e-3",
             prompt=image_prompt,
-            response_format="url"
+            response_format="url",
+            size="1024x1792"  # Forces a tall full-body image
         )
         return response.data[0].url if response.data else "Failed to generate image."
     except Exception as e:
